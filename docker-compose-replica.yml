@@ -1,0 +1,38 @@
+version: '2'
+services:
+  mariadb-master:
+    image: 'bitnami/mariadb:latest'
+    ports:
+      - 33066:3306
+    volumes:
+      - 'mariadb_master_data:/bitnami'
+    environment:
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_USER=bn_wordpress
+      - MARIADB_DATABASE=bitnami_wordpress
+      - MARIADB_SLAVE_HOST=mariadb-slave
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+  mariadb-slave:
+    image: 'bitnami/mariadb:latest'
+    ports:
+      - 33067:3306
+    depends_on:
+      - mariadb-master
+    environment:
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_USER=bn_wordpress
+      - MARIADB_DATABASE=bitnami_wordpress
+      - MARIADB_MASTER_HOST=mariadb-master
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+volumes:
+  mariadb_master_data:
+    driver: local
+  apache_data:
+    driver: local
+  php_data:
+    driver: local
